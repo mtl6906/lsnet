@@ -24,6 +24,8 @@ namespace ls
 		int Reader::tryRead(void *data, int len)
 		{
 			int n = recv(fd, data, len, MSG_DONTWAIT);
+			if(n < 0 && (errno == EWOULDBLOCK || errno == EAGAIN))
+				throw Exception(Exception::LS_EWOULDBLOCK);
 			if(n < 0)
 				throw Exception(Exception::LS_ERECV);
 			if(n == 0)

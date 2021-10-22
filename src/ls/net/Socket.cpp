@@ -26,6 +26,11 @@ namespace ls
 			return reader.get();
 		}
 
+		int Socket::getFd()
+		{
+			return fd;
+		}
+
 		Socket::~Socket()
 		{
 			if(fd > 0)

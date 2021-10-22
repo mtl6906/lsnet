@@ -16,6 +16,7 @@ namespace ls
 				~Socket();
 				io::Writer *getWriter();
 				io::Reader *getReader();
+				int getFd();
 			protected:
 				int fd;
 				std::unique_ptr<io::Writer> writer;

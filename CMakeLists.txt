@@ -16,9 +16,9 @@ add_executable(server sample/server.cpp ${SRC})
 
 add_executable(client sample/client.cpp ${SRC})
 
-target_link_libraries(server lsbuffer lsepoll  lsio lsexception)
+target_link_libraries(server lsbuffer lsepoll lsio lsexception lslogger lstime)
 
-target_link_libraries(client lsbuffer lsio lsexception)
+target_link_libraries(client lsbuffer lsio lsexception lslogger lstime)
 
 install(TARGETS lsnet DESTINATION lib)
 install(DIRECTORY include/ls/net DESTINATION include/ls)
