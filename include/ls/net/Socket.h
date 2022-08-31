@@ -17,6 +17,7 @@ namespace ls
 				io::Writer *getWriter();
 				io::Reader *getReader();
 				int getFd();
+				void reset(int fd);
 			protected:
 				int fd;
 				std::unique_ptr<io::Writer> writer;

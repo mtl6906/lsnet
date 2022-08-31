@@ -36,5 +36,14 @@ namespace ls
 			if(fd > 0)
 				close(fd);
 		}
+
+		void Socket::reset(int fd)
+		{
+			if(this -> fd > 0)
+				close(this -> fd);
+			this -> fd = fd;
+			writer.reset(nullptr);
+			reader.reset(nullptr);
+		}
 	}
 }

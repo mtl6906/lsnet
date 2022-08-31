@@ -1,6 +1,7 @@
 #include "ls/net/Writer.h"
 #include "ls/Exception.h"
 #include "sys/socket.h"
+#include "ls/DefaultLogger.h"
 
 namespace ls
 {
@@ -15,7 +16,7 @@ namespace ls
 		{
 			int n = send(fd, data, len, 0);
 			if(n < 0)
-				throw Exception(Exception::LS_ESEND);
+				return Exception::LS_ESEND;
 			return n;
 		}
 
@@ -23,9 +24,9 @@ namespace ls
 		{
 			int n = send(fd, data, len, MSG_DONTWAIT);
 			if(n < 0 && (errno == EAGAIN || errno == EWOULDBLOCK))
-				throw Exception(Exception::LS_EWOULDBLOCK);
+				return Exception::LS_EWOULDBLOCK;
 			if(n < 0)
-				throw Exception(Exception::LS_ESEND);
+				return Exception::LS_ESEND;
 			return n;
 		}
 	}

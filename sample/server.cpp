@@ -3,6 +3,7 @@
 #include "ls/net/Reader.h"
 #include "ls/Exception.h"
 #include "ls/io/Factory.h"
+#include "ls/DefaultLogger.h"
 #include "ls/Pool.h"
 #include "iostream"
 #include "map"
@@ -75,6 +76,11 @@ int main(int argc, char **argv)
 			if(server.getFd() == fd)
 			{
 				int connfd = server.accept();
+				if(connfd < 0)
+				{
+					LOGGER(ls::INFO) << "accept error" << ls::endl;
+					return 0;
+				}
 				cout << "accept fd " << connfd << endl;
 				auto connection = pool.get();
 				connection -> reset(new net::Socket(connfd));
@@ -85,31 +91,23 @@ int main(int argc, char **argv)
 			{
 				auto connection = connectionMapper[fd];
 				auto inputStream = connection -> getInputStream();
-				try
+				int result = inputStream -> tryRead();
+				if(result < 0 && errno != EAGAIN && errno != EWOULDBLOCK)
 				{
-					inputStream -> tryRead();
+					cout << "release: " << fd << endl;
+					connection -> reset(nullptr);
+					pool.put(connection);
+					connectionMapper.erase(fd);
+					continue;
 				}
-				catch(Exception &e)
+				int ec;
+				string text = inputStream -> split(ec, "end");
+				if(ec == Exception::LS_EFORMAT && inputStream -> full())
 				{
-					if(errno != EAGAIN && errno != EWOULDBLOCK)
-					{
-						cout << "release: " << fd << endl;
-						connection -> reset(nullptr);
-						pool.put(connection);
-						connectionMapper.erase(fd);
-						continue;
-					}
+					LOGGER(ls::INFO) << "end" << ls::endl;
+					return 0;
 				}
-				try
-				{
-					auto text = inputStream -> split("end");
-					cout << text << endl;
-				}
-				catch(Exception &e)
-				{
-					if(e.getCode() == Exception::LS_EFORMAT && inputStream -> full())
-						throw e;
-				}
+				cout << text << endl;
 			}
 		}
 	}

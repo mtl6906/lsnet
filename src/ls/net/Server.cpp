@@ -16,11 +16,14 @@ namespace ls
 			addr.sin_port = htons(port);
 			int fd = socket(AF_INET, SOCK_STREAM, 0);
 			if(fd < 0)
-				throw Exception(Exception::LS_ESOCKET);
+				return Exception::LS_ESOCKET;
+			int enable = 1;
+			if(setsockopt(fd, SOL_SOCKET, SO_REUSEPORT, &enable, sizeof(int)) < 0)
+				return Exception::LS_EREUSEPORT;
 			if(bind(fd, (sockaddr *)&addr, sizeof(addr)) < 0)
-				throw Exception(Exception::LS_EBIND);
+				return Exception::LS_EBIND;
 			if(listen(fd, 128) < 0)
-				throw Exception(Exception::LS_ELISTEN);
+				return Exception::LS_ELISTEN;
 			return fd;
 		}
 
@@ -34,8 +37,10 @@ namespace ls
 			sockaddr_in cliaddr = {};
 			socklen_t len = sizeof(cliaddr);
 			int fd = ::accept(listenfd, (sockaddr *)&cliaddr, &len);
+			if(fd < 0 && (errno == EAGAIN || errno == EWOULDBLOCK))
+				return Exception::LS_EWOULDBLOCK;
 			if(fd < 0)
-				throw Exception(Exception::LS_EACCEPT);
+				return Exception::LS_EACCEPT;
 			return fd;
 		}
 

@@ -22,7 +22,7 @@ namespace ls
 			addr.sin_port = htons(port);
 			int fd = socket(AF_INET, SOCK_STREAM, 0);
 			if(::connect(fd, (sockaddr *)&addr, sizeof(addr)) < 0)
-				throw Exception(Exception::LS_ECONN);
+				return Exception::LS_ECONN;
 			return fd;
 		}
 	}

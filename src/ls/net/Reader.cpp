@@ -1,6 +1,7 @@
 #include "ls/net/Reader.h"
 #include "ls/Exception.h"
 #include "sys/socket.h"
+#include "ls/DefaultLogger.h"
 
 namespace ls
 {
@@ -15,21 +16,24 @@ namespace ls
 		{
 			int n = recv(fd, data, len, 0);
 			if(n < 0)
-				throw Exception(Exception::LS_ERECV);
+				return Exception::LS_ERECV;
 			if(n == 0)
-				throw Exception(Exception::LS_EEOF);
+				return Exception::LS_EEOF;
 			return n;
 		}
 
 		int Reader::tryRead(void *data, int len)
 		{
+			LOGGER(ls::INFO) <<"fd: " <<fd <<", "
+			       <<"data: " << (data == nullptr)  <<", "
+			       <<"len: " << len << ls::endl;
 			int n = recv(fd, data, len, MSG_DONTWAIT);
 			if(n < 0 && (errno == EWOULDBLOCK || errno == EAGAIN))
-				throw Exception(Exception::LS_EWOULDBLOCK);
+				return Exception::LS_EWOULDBLOCK;
 			if(n < 0)
-				throw Exception(Exception::LS_ERECV);
+				return Exception::LS_ERECV;
 			if(n == 0)
-				throw Exception(Exception::LS_EEOF);
+				return Exception::LS_EEOF;
 			return n;
 		}
 	}
